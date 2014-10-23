@@ -1,0 +1,64 @@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>@title</title>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/foundation.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/general_foundicons.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+
+    </head>
+<body>
+
+<div class="row">
+<div class="large-12 columns">
+
+    <!--MENU -->
+    <div class="row">
+        <div class="large-12 columns">
+            <nav class="top-bar" data-topbar>
+                <ul class="title-area">
+                    <li class="name">
+                        <h1><a href="@routes.Application.index()">Backend</a></h1>
+                    </li>
+                    <li class="toggle-topbar menu-icon">
+                        <a href="@routes.Application.index()"><span>menu</span></a>
+                    </li>
+                </ul>
+                <section class="top-bar-section">
+                    <ul class="left">
+                        <li><a class="active" href="@routes.Application.addProduct()">Create product</a></li>
+                    </ul>
+                    <ul class="left">
+                        <li><a class="active" href="@routes.Application.orders()">Orders</a></li>
+                    </ul>
+                </section>
+            </nav>
+        </div>
+    </div>
+
+    <!--CORPS DE PAGE-->
+    @content
+
+
+    <!--FOOTER-->
+    <footer class="row">
+        <div class="large-12 columns">
+            <hr>
+            <div class="row">
+                <div class="large-6 columns">
+                    <p>© Copyright The Amazing Store.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+</div>
+<script src="@routes.Assets.at("javascripts/vendor/jquery.js")" ></script>
+<script src="@routes.Assets.at("javascripts/foundation.min.js")" ></script>
+<script src="@routes.Assets.at("javascripts/foundation/foundation.reveal.js")" ></script>
+<script src="@routes.Assets.at("javascripts/application.js")" ></script>
+</body>
+</html>

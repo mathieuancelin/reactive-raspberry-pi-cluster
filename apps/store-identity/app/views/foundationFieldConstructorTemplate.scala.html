@@ -1,0 +1,10 @@
+@(elements: helper.FieldElements)
+
+<div class="@if(elements.hasErrors) {error}">
+    <label for="@elements.id">@elements.label(elements.lang)
+        @elements.input
+    </label>
+    @if(elements.hasErrors) {
+        <small class="error">@elements.errors(elements.lang).mkString(", ")</small>
+    }
+</div>

@@ -1,0 +1,25 @@
+@(product: Product)
+<tr id="cart-@product.id" class="cart-product">
+    <td><img width="100" src="@("/static/images/"+product.image)" /></td>
+    <td>@product.label</td>
+    <td>@product.description</td>
+    <td>
+        <form>
+            <div class="row">
+            <div class="large-12 columns">
+                <div class="row collapse">
+                    <div class="small-3 columns">
+                        <a class="button prefix radius less"><i class="fi-minus"></i></a>
+                    </div>
+                    <div class="small-6 columns"><input type="text" value="{{quantity}}" disabled></div>
+                    <div class="small-3 columns">
+                        <a class="button postfix radius more"><i class="fi-plus"></i></a>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </form>
+    </td>
+    <td class="price">@product.price</td>
+    <td class="total">{{total}}</td>
+</tr>

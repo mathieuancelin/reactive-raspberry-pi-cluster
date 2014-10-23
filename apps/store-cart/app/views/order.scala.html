@@ -1,0 +1,19 @@
+@import com.amazing.store.models.Order
+@import com.amazing.store.models.User
+
+@(order: Order, items: Int, user: User)
+
+@main("Amazing Store cart history", items, user) {
+
+    <h3>Your order n° @order.id.toString</h3>
+
+    Date : @order.at.toString("dd/MM/yyyy HH:mm:ss")  <br/>
+    Cost : @order.totalcost €  </br>
+    <br/>
+    <ul>
+        @for(line <- order.lines) {
+            <ul>@line.productId - quantity @line.quantity</ul>
+        }
+    </ul>
+
+}

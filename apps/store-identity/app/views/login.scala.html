@@ -1,0 +1,58 @@
+@(service: Option[String], error: Option[String])
+
+@main("Login in the Amazing Store", None, service) {
+
+    <form action="@routes.Application.login(service)" method="POST">
+        @service.map { s =>
+        <input name="service" type="hidden" value="@s"/>
+        }
+        <div class="row">
+            <div class="small-12">
+                <div class="row" style="margin-top: 30px">
+                    <div class="small-3 columns">&nbsp;</div>
+                    <div class="small-6 columns">
+                        <h3>Sign in</h3>
+                    </div>
+                    <div class="small-3 columns"></div>
+                </div>
+                <div class="row">
+                    <div class="small-3 columns"></div>
+                    <div class="small-6 columns">
+                    @error.foreach { e =>
+                        <div data-alert class="alert-box alert">
+                            @e
+                            <a href="#" class="close">&times;</a>
+                        </div>
+                    }
+                    </div>
+                    <div class="small-3 columns"></div>
+                </div>
+                <div class="row" style="margin-top: 30px">
+                    <div class="small-3 columns">
+                        <label for="right-label" class="right inline"><i class="fi-torso"></i> Login</label>
+                    </div>
+                    <div class="small-6 columns">
+                        <input name="login" type="text" required placeholder="my.login"/>
+                    </div>
+                    <div class="small-3 columns"></div>
+                </div>
+                <div class="row">
+                    <div class="small-3 columns">
+                        <label for="right-label" class="right inline"><i class="fi-lock"></i> Password</label>
+                    </div>
+                    <div class="small-6 columns">
+                        <input name="password" type="password" required/>
+                    </div>
+                    <div class="small-3 columns"></div>
+                </div>
+
+                <div class="row" style="margin-top: 30px">
+                    <div class="small-5 columns">&nbsp;</div>
+                    <button class="">Sign in</button>
+                    <div class="small-5 columns"></div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+}

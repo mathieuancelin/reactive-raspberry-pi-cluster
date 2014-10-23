@@ -1,0 +1,26 @@
+@import views.FoundationHelper._
+
+@(productForm: Form[(String, String, Option[String], BigDecimal)], action: Call)
+
+@main("Ecommerce") {
+<div class="row">
+    <div class="large-2 columns"></div>
+    <div class="large-8 columns">
+        <h1>Create product</h1>
+
+        @helper.form(action = action, 'enctype -> "multipart/form-data") {
+            @helper.inputText(productForm("label"))
+            @helper.inputText(productForm("description"))
+            @helper.inputFile(productForm("image"))
+            @helper.inputText(productForm("imageName"))
+            @helper.inputText(productForm("price"))
+
+            <button type="submit" >Save</button>
+            <a href="@routes.Application.index()" class="button secondary" >Retour</a>
+        }
+
+    </div>
+    <div class="large-2 columns"></div>
+</div>
+
+}

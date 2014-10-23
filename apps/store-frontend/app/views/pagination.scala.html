@@ -1,0 +1,45 @@
+@(page:Int, pageLength:Int, nbPage:Int, route:Int => Call, bound:Int = 3)
+@lowbound() = @{
+    val low = (page - (bound / 2).floor)
+    if ( low > 0) {
+        low toInt
+    } else {
+        1
+    }
+}
+@highbound() = @{
+    if(page+bound <= nbPage){
+        page+bound - 1
+    }else{
+        nbPage
+    }
+}
+<ul class="pagination">
+
+    @if(page < bound) {
+    <li class="arrow unavailable"><a>&laquo;</a></li>
+    } else {
+        @if(lowbound()-bound <= 0) {
+        <li class="arrow"><a href="@route(1)">&laquo;</a></li>
+        } else {
+        <li class="arrow"><a href="@route(lowbound()-bound)">&laquo;</a></li>
+        }
+    }
+
+    @for(i <- lowbound().max(1) until page) {
+    <li><a href="@route(i)">@i</a></li>
+    }
+
+    <li class="active"><a href="#">@page</a></li>
+
+    @for(i <- page+1 to highbound()) {
+    <li><a href="@route(i)">@i</a></li>
+    }
+
+    @if(highbound() < nbPage) {
+    <li class="arrow"><a href="@route(highbound())">&raquo;</a></li>
+    } else {
+    <li class="arrow unavailable"><a>&raquo;</a></li>
+    }
+
+</ul>

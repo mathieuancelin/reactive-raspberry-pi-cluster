@@ -1,0 +1,23 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET         /                         controllers.Application.index
+GET         /identity/health          controllers.Application.applicationIsUp()
+GET     /identity/stats          controllers.Application.stats()
+GET         /logout                   controllers.Application.logout(login: String)
+GET         /login                    controllers.Application.loginPage(service: Option[String])
+POST        /login                    controllers.Application.login(service: Option[String])
+
+GET         /createAccount            controllers.Application.createAccountPage(service: Option[String])
+POST        /createAccount            controllers.Application.createAccount(service: Option[String])
+GET         /updateAccount            controllers.Application.updateAccountPage(login, service: Option[String])
+
+GET         /recover                  controllers.Application.recover()
+
+
+GET         /api/users/current        controllers.Application.sessionJson
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file             controllers.Assets.at(path="/public", file)

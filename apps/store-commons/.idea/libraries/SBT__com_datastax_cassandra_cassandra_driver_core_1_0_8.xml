@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="SBT: com.datastax.cassandra:cassandra-driver-core:1.0.8">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.datastax.cassandra/cassandra-driver-core/jars/cassandra-driver-core-1.0.8.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.datastax.cassandra/cassandra-driver-core/bundles/cassandra-driver-core-1.0.8.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.datastax.cassandra/cassandra-driver-core/docs/cassandra-driver-core-1.0.8-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.datastax.cassandra/cassandra-driver-core/srcs/cassandra-driver-core-1.0.8-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

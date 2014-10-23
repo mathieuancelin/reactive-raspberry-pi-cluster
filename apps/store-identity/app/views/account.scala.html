@@ -1,0 +1,30 @@
+@import views.FoundationHelper._
+@import com.amazing.store.models.User
+
+@(user: Option[User], userForm: Form[com.amazing.store.models.User], service: Option[String])
+
+@main("Account in the Amazing Store", user, service) {
+
+    <div class="row">
+        <div class="large-12 columns">
+            <h1></h1>
+            @helper.form(routes.Application.createAccount(service)) {
+            <fieldset>
+                @if(user.isEmpty){
+                    <legend>Create account</legend>
+                } else {
+                    <legend>My account</legend>
+                }
+                @helper.inputText(userForm("login"))
+                @helper.inputText(userForm("name"))
+                @helper.inputPassword(userForm("password"))
+
+                <button type="submit" >Save</button>
+                <a href="@service.getOrElse(routes.Application.index())" class="button secondary" >Back</a>
+            </fieldset>
+            }
+
+        </div>
+    </div>
+
+}

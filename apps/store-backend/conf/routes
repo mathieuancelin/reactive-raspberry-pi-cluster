@@ -1,0 +1,24 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                           controllers.Application.index
+GET     /backend/health          controllers.Application.applicationIsUp
+GET     /backend/stats          controllers.Application.stats()
+GET     /createProduct             controllers.Application.addProduct
+POST     /createProduct            controllers.Application.createProduct
+GET     /updateProduct/:id         controllers.Application.editProduct(id)
+POST     /updateProduct/:id        controllers.Application.updateProduct(id)
+POST     /updatePrice/:id          controllers.Application.updatePrice(id)
+POST     /uploadZip                controllers.Application.uploadZip
+GET     /orders                    controllers.Application.orders
+
+GET     /orders/ws                    controllers.Application.webSocket
+
+#GET     /products/price           controllers.Application.listProductPrice(ids)
+
+POST    /admin/api/recover             controllers.Application.recoverState
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)

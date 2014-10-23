@@ -1,0 +1,13 @@
+<ul class="right">
+    <li>
+        <a href="@(config.Env.identityLink + "/updateAccount?login={{login}}&service="+config.Env.frontendLink)" ><i class="fi-home"></i> Hello {{name}}</a>
+    </li>
+    <li>
+        <a href="@routes.Application.cart()" id="cart">
+
+        </a>
+    </li>
+    <li>
+        <a href="@(config.Env.identityLink + "/logout?login={{login}}")">Logout</a>
+    </li>
+</ul>

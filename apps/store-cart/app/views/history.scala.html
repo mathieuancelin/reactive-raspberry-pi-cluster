@@ -1,0 +1,15 @@
+@import com.amazing.store.models.Order
+
+@(orders: List[Order], items: Int, user: com.amazing.store.models.User)
+
+@main("Amazing Store cart history", items, user) {
+
+    <h3>Your previous orders</h3>
+
+    <ul>
+        @for(order <- orders) {
+            <li><a href="@routes.Application.showOrder(order.id.toString)">@order.id.toString</a> - @order.totalcost € - on @order.at.toString("dd/MM/yyyy HH:mm:ss")</li>
+        }
+    </ul>
+
+}

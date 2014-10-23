@@ -1,0 +1,28 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+
+# Home page
+GET        /                           controllers.Application.index()
+GET        /frontend/health            controllers.Application.applicationIsUp()
+GET     /frontend/stats          controllers.Application.stats()
+GET        /retry                      controllers.Application.retryWhenServiceDown(where)
+
+GET        /page/:pageNum              controllers.Application.page(pageNum:Int)
+GET        /search                     controllers.Application.search(pageNum:Int ?= 1, search:Option[String])
+GET        /product/:id                controllers.Application.pageProduct(id)
+
+GET        /cart                       controllers.Application.cart()
+
+GET        /fragments/:type            controllers.Application.fragmentsByIds(ids:String, type)
+
+GET        /products/feed              controllers.Application.feed
+
+GET        /templates/bar.html         controllers.Application.barTemplate
+
+# Map static resources from the /public folder to the /assets URL path
+GET        /assets/*file               controllers.Assets.at(path="/public", file)
+
+GET        /static/images/:name        controllers.Application.images(name)

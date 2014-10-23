@@ -1,0 +1,61 @@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>@title</title>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/foundation.min.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/foundation-icons.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+
+    </head>
+    <body>
+
+<div class="row">
+<div class="large-12 columns">
+
+    <!--MENU -->
+    <div class="row">
+        <div class="large-12 columns">
+            <nav class="top-bar" data-topbar>
+                <ul class="title-area">
+                    <li class="name">
+                        <h1><a href="@routes.Application.index()">Amazing Store</a></h1>
+                    </li>
+                    <li class="toggle-topbar menu-icon">
+                        <a href="#"><span>menu</span></a>
+                    </li>
+                </ul>
+                <section id="menu" class="top-bar-section">
+                    <ul class="right">
+                        <li>
+                            <a href="@(config.Env.identityLink + "?service="+config.Env.frontendLink)"><i class="fi-torso"></i> Login</a>
+                        </li>
+                    </ul>
+                </section>
+            </nav>
+        </div>
+    </div>
+
+    <!--CORPS DE PAGE-->
+    @content
+
+
+    <!--FOOTER-->
+    <footer class="row">
+        <div class="large-12 columns">
+            <hr>
+            <div class="row">
+                <div class="large-6 columns">
+                    <p>© Copyright The Amazing Store.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+</div>
+
+
+</body>
+</html>

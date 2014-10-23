@@ -1,0 +1,58 @@
+@(product: Product)
+
+@main("Ecommerce") {
+<div class="row product-detail" id="detail-@product.id">
+
+    <div class="large-12 columns">
+        <h1 >@product.label</h1>
+    </div>
+    <div class="large-5 columns" >
+        <img src="@("/static/images/"+product.image)" />
+    </div>
+
+    <div class="large-7 columns panel" >
+        <div class="row" >
+            <div class="large-12 columns">
+                <p><br/></p>
+            </div>
+        </div>
+        <div class="row" >
+            <div class="large-12 columns">
+                <p>@product.description</p>
+            </div>
+        </div>
+        <br/>
+        <div class="row" >
+            <div class="large-12 columns">
+                <div class="right">
+                    <h5>
+                        <span class="right">@product.price €</span>
+                    </h5>
+                    <button type="button" class=" button alert addToCart">Add to cart</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script src="@routes.Assets.at("concat-product.js")" ></script>
+
+<!--
+<script src="@routes.Assets.at("javascripts/vendor/jquery.js")" ></script>
+<script src="@routes.Assets.at("javascripts/vendor/handlebars-v1.3.0.js")" ></script>
+<script src="@routes.Assets.at("javascripts/foundation/foundation.js")" ></script>
+<script src="@routes.Assets.at("javascripts/foundation/foundation.alert.js")" ></script>
+<script src="@routes.Assets.at("javascripts/vendor/underscore-min.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/env.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/http.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/contextService.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/cartService.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/productService.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/topBar.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/product.js")" ></script>
+-->
+
+
+}

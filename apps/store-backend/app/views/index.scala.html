@@ -1,0 +1,50 @@
+@import views.FoundationHelper._
+
+@(products: List[models.Product])
+
+@main("Ecommerce") {
+
+<div class="row">
+    <div class="large-12 columns">
+        <br/>
+        @helper.form(action = routes.Application.uploadZip, 'enctype -> "multipart/form-data") {
+            <input type="file" name="products">
+            <p>
+                <button type="submit" >Upload</button>
+            </p>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="large-12 columns">
+
+        <div class="row">
+            <table>
+                <thead>
+                <tr>
+                    <th width="30"></th>
+                    <th width="150">Image</th>
+                    <th width="200">Label</th>
+                    <th>Description</th>
+                    <th width="150">Price</th>
+                </tr>
+                </thead>
+                <tbody>
+                @for(product <- products) {
+                <tr>
+                    <td><a href="@routes.Application.editProduct(product.id.toString)"><i class="foundicon-edit"></i></a></td>
+                    <td>@product.image</td>
+                    <td>@product.label</td>
+                    <td>@product.description</td>
+                    <td>
+                        @product.price
+                    </td>
+                </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+}

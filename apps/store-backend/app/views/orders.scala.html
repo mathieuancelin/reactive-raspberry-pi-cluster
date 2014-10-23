@@ -1,0 +1,48 @@
+@import com.amazing.store.models.Order
+@import com.amazing.store.models.OrderLine
+
+@(orders: List[Order])
+
+@main("Orders") {
+
+<script id="tplLine" type="text/x-handlebars-template">
+    <tr>
+        <td>{{login}}</td>
+        <td>{{at}}</td>
+        <td>{{totalcost}}</td>
+    </tr>
+</script>
+
+<div class="row">
+    <div class="large-12 columns">
+        <br/>
+    </div>
+</div>
+<div class="row">
+    <div class="large-12 columns">
+        <h1>Orders</h1>
+        <div class="row">
+            <table>
+                <thead>
+                <tr>
+                    <th width="150">Login</th>
+                    <th width="300">Date</th>
+                    <th width="200">Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                @for(order <- orders) {
+                <tr>
+                    <td>@order.login</td>
+                    <td>@order.at.toString("dd/MM/yyyy HH:mm:ss")</td>
+                    <td>@order.totalcost</td>
+                </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script data-main="@routes.Assets.at("javascripts/amazing/ordersPage")" src="@routes.Assets.at("javascripts/vendor/require.js")" ></script>
+}

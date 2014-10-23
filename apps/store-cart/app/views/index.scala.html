@@ -1,0 +1,23 @@
+@(count: Int, items: List[CartLine], user: com.amazing.store.models.User)
+
+@main("Amazing Store cart", count, user) {
+
+    <h3>Your current cart </h3>
+
+    <ul>
+        @for(item <- items) {
+            <li>@item.productId - quantity @item.quantity</li>
+        }
+    </ul>
+
+    @**
+    * <form method="POST" action="@routes.Application.addProduct">
+    *     <button class="button">Add product (dev)</button>
+    * </form>
+    **@
+    <form method="POST" action="@routes.Application.orderCart("1")">
+        <button class="button">Order now !!!</button>
+    </form>
+
+
+}

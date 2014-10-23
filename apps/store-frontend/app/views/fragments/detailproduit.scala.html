@@ -1,0 +1,16 @@
+@(product: Product)
+<div class="large-4 small-6 columns product-detail" id="detail-@product.id">
+    <a class="th radius" href="@routes.Application.pageProduct(product.id)">
+        <img width="300px" src="@("/static/images/"+product.image)" />
+    </a>
+    <div class="panel">
+        <h5>@product.label</h5>
+        <p>
+        @{ val size = if(product.description.length < 25) product.description.length else 25
+            product.description.subSequence(0, size) + " ..."
+        }
+        </p>
+        <h6 class="subheader">@product.price €</h6>
+        <button type="button" class="button alert addToCart">Add to cart</button>
+    </div>
+</div>

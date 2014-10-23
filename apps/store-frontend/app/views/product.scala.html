@@ -1,0 +1,78 @@
+@(products: Html, query:Option[String], currentPage:Int, nbPage:Long, nbPerPage:Long)
+
+@main("Ecommerce") {
+
+<div class="row">
+    <div class="large-12 columns">
+        <br/>
+    </div>
+</div>
+<div class="row">
+    <div class="large-12 columns">
+        <img src="@routes.Assets.at("images/baniere.png")" />
+    </div>
+</div>
+<div class="row">
+    <div class="large-12 columns">
+
+        <form action="/search" >
+            <div class="row collapse">
+                <div class="small-10 columns">
+                    @query match {
+                        case Some(q) => {
+                            <input id="search" name="search" type="text" placeholder="Search a product" value="@q">
+                        }
+                        case None => {
+                            <input id="search" name="search" type="text" placeholder="Search a product">
+                        }
+                    }
+
+                </div>
+                <div class="small-2 columns">
+                    <button id="searchButton" type="submit" class="button alert postfix radius">Search</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+    <div class="large-12 columns">
+
+        <div class="row products">
+            @products
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="large-12 columns center">
+        @query match {
+            case Some(o) => {
+                @pagination(currentPage, nbPerPage.toInt, nbPage.toInt, routes.Application.search(_, query))
+            }
+            case None => {
+                @pagination(currentPage, nbPerPage.toInt, nbPage.toInt, routes.Application.page(_))
+            }
+        }
+    </div>
+</div>
+
+
+<script src="@routes.Assets.at("concat-product.js")" ></script>
+
+<!--
+<script src="@routes.Assets.at("javascripts/vendor/jquery.js")" ></script>
+<script src="@routes.Assets.at("javascripts/vendor/handlebars-v1.3.0.js")" ></script>
+<script src="@routes.Assets.at("javascripts/foundation/foundation.js")" ></script>
+<script src="@routes.Assets.at("javascripts/foundation/foundation.alert.js")" ></script>
+<script src="@routes.Assets.at("javascripts/vendor/underscore-min.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/env.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/http.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/contextService.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/cartService.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/productService.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/topBar.js")" ></script>
+<script src="@routes.Assets.at("javascripts/amazing/app/product.js")" ></script>
+-->
+
+
+}
