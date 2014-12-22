@@ -3,7 +3,14 @@ I don't always write reactive applications, but when I do, it runs on Raspberry 
 
 The slides of the presentation are here :
 
-https://github.com/mathieuancelin/reactive-raspberry-pi-cluster/raw/master/ReactiveAppOnRaspberryPi.pdf
+* https://github.com/mathieuancelin/reactive-raspberry-pi-cluster/raw/master/ReactiveAppOnRaspberryPi-nantes.pdf
+* https://github.com/mathieuancelin/reactive-raspberry-pi-cluster/raw/master/ReactiveAppOnRaspberryPi-poitiers.pdf
+
+or here :
+
+* https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi
+* https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi-poitiers
+
 
 The video of the presentation (in french) is available here :
 
