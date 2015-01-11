@@ -10,6 +10,7 @@ import com.amazing.store
 import com.amazing.store.messages._
 import com.amazing.store.models.Order
 import com.amazing.store.models.OrderLine
+import com.amazing.store.monitoring.ProxyActor
 import com.amazing.store.persistence.processor.{Recover, RecoverStarting, EventsourceProcessor}
 import com.amazing.store.persistence.views
 import com.amazing.store.persistence.views.Views
@@ -197,7 +198,7 @@ class CartView extends views.View {
 }
 
 object CartProcessor{
-  def props() = Props(classOf[CartProcessor])
+  def props() = ProxyActor.props(Props(classOf[CartProcessor]))
 }
 class CartProcessor extends EventsourceProcessor {
 

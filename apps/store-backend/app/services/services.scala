@@ -8,6 +8,7 @@ import akka.actor._
 import akka.pattern._
 import akka.util.Timeout
 import com.amazing.store.messages.BackendService.{ListProducts, ListProductsPrices, NewOrder}
+import com.amazing.store.monitoring.ProxyActor
 import com.amazing.store.persistence.processor.{EventsourceProcessor, Recover}
 import com.amazing.store.persistence.views.{View, Views}
 import com.amazing.store.services.FrontendServiceClient
@@ -125,7 +126,7 @@ class ProductView extends View {
 }
 
 object ProductProcessor {
-  def props(): Props = Props(classOf[ProductProcessor])
+  def props(): Props = ProxyActor.props(Props(classOf[ProductProcessor]))
 }
 
 class ProductProcessor extends EventsourceProcessor {

@@ -15,9 +15,12 @@ object StoreCommonsBuild extends Build {
       "com.google.guava" % "guava" % "17.0",
       "com.typesafe.play" %% "play-json" % "2.3.0",
       "com.typesafe.play" %% "play" % "2.3.0",
+      "com.typesafe.play" %% "play-ws" % "2.3.0",
       "org.jgroups" % "jgroups" % "3.4.4.Final",
       "com.datastax.cassandra" % "cassandra-driver-core" % "2.0.3",
-      "com.google.code.findbugs" % "jsr305" % "2.0.1"
+      "com.google.code.findbugs" % "jsr305" % "2.0.1",
+      "org.elasticsearch" % "metrics-elasticsearch-reporter" % "2.0"
+
     ),
     organization := "com.amazing.store",
     version := appVersion,

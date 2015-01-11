@@ -4,6 +4,7 @@ import akka.actor._
 import akka.cluster.Cluster
 import com.amazing.store.cassandra.CassandraDB
 import com.amazing.store.cluster.{SeedConfig, SeedHelper}
+import com.amazing.store.monitoring.{MetricsActor, ProxyActor}
 import com.amazing.store.persistence.processor.DistributedProcessor
 import com.amazing.store.services.{Client, Directory}
 import com.amazing.store.tools.Reference
@@ -58,7 +59,9 @@ object Global extends GlobalSettings {
     Client.system.set(Actors.system())  // Init du locator
     Client.cluster.set(Actors.cluster())  // Init du locator
     Client.init() // Ecoute du cluster
-    Actors.system().actorOf(Props[UserService], Directory.USER_SERVICE_NAME)  // Init du service Users
+    Actors.system().actorOf(ProxyActor.props(Props[UserService]), Directory.USER_SERVICE_NAME)  // Init du service Users
+
+    Actors.system().actorOf(MetricsActor.props())
 
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     UserStore.init()

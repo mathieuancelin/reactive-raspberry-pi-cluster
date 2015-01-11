@@ -6,6 +6,7 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.cluster.Cluster
 import com.amazing.store.cassandra.CassandraDB
 import com.amazing.store.cluster.{SeedConfig, SeedHelper}
+import com.amazing.store.monitoring.{MetricsActor, ProxyActor}
 import com.amazing.store.persistence.processor.DistributedProcessor
 import com.amazing.store.services.{Client, Directory}
 import com.amazing.store.tools.Reference
@@ -81,10 +82,12 @@ object Global extends GlobalSettings {
     Client.cluster.set(Actors.cluster())  // Init du locator
     Client.init()  // Ecoute du cluster
 
-    Actors.cartView.set(Actors.system().actorOf(Props(classOf[CartView])))
+    Actors.cartView.set(Actors.system().actorOf(ProxyActor.props(Props(classOf[CartView]))))
     val processorRef = DistributedProcessor(Actors.system()).buildRef("cart", CartProcessor.props())
     Actors.cartProcessor.set(processorRef)
-    Actors.cartService.set(Actors.system().actorOf(Props(classOf[RemoteCartService]), Directory.CART_SERVICE_NAME))
+    Actors.cartService.set(Actors.system().actorOf(ProxyActor.props(Props(classOf[RemoteCartService])), Directory.CART_SERVICE_NAME))
+
+    Actors.system().actorOf(MetricsActor.props())
   }
 
   override def onStop(app: Application): Unit = {

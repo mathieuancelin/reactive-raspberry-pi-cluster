@@ -5,6 +5,7 @@ import java.util.UUID
 import actors.Actors
 import akka.actor.{Actor, ActorRef, Props}
 import com.amazing.store.models.User
+import com.amazing.store.monitoring.ProxyActor
 import com.datastax.driver.core.utils.UUIDs
 import org.joda.time.DateTime
 import play.api.Logger
@@ -17,7 +18,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Promise
 
 object WebBrowserActor{
-  def props(user: User)(out: ActorRef) = Props(classOf[WebBrowserActor], out, user)
+  def props(user: User)(out: ActorRef) = ProxyActor.props(Props(classOf[WebBrowserActor], out, user))
 }
 
 class WebBrowserActor(out: ActorRef, user: User) extends Actor {

@@ -1,8 +1,7 @@
 package models
 
-import com.amazing.es.Index
+import com.amazing.store.es.Index
 import controllers.Application
-import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json._
 import play.twirl.api
@@ -29,7 +28,7 @@ object Product {
   implicit val productWrites = Json.writes[Product]
   val writes: Writes[Product] = productWrites
 
-  val indexEs = Index[Product]("products")(index = Json.obj(
+  val indexEs = Index("products")(settings = Json.obj(
     "settings" -> Json.obj(
       "index" -> Json.obj(
         "analysis" -> Json.obj(
@@ -127,7 +126,7 @@ object Product {
 
   def getById(id: String) = indexEs.get(id)
 
-  def save(product: Product): Future[Product] = indexEs.save(product.id, product).map(ind => product)
+  def save(product: Product): Future[Product] = indexEs.save(product, Some(product.id)).map(ind => product)
 
   def listFragments(`type`: String, mayBeSearch: Option[String], pageNumber: Int, numberPerPage: Int): Future[(Long, List[String])] = {
     val from = (pageNumber - 1) * numberPerPage

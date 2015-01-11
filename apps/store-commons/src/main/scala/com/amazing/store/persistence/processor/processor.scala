@@ -5,6 +5,7 @@ import akka.cluster.ClusterEvent._
 import akka.cluster.{Cluster, Member}
 import akka.pattern._
 import akka.util.Timeout
+import com.amazing.store.monitoring.ProxyActor
 import org.joda.time.DateTime
 import com.amazing.store.persistence.journal.{Journal, JournalMessage}
 import com.amazing.store.persistence.views._
@@ -117,7 +118,7 @@ trait EventsourceProcessor extends Actor {
 
 class DistributedProcessor(system: ActorSystem) {
   def buildRef(name: String, props: Props): ActorRef =  {
-    system.actorOf(Props(classOf[EventSourceProcessorProxy], props), name)
+    system.actorOf(ProxyActor.props(Props(classOf[EventSourceProcessorProxy], props)), name)
   }
 }
 object DistributedProcessor {

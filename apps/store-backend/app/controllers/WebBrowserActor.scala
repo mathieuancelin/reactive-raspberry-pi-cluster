@@ -2,11 +2,12 @@ package controllers
 
 import akka.actor.{Actor, ActorRef, Props}
 import com.amazing.store.models.{OrderLine, Order}
+import com.amazing.store.monitoring.ProxyActor
 import play.api.libs.json.{Writes, Json}
 import actors.Actors
 
 object WebBrowserActor {
-  def props(out: ActorRef) = Props(classOf[WebBrowserActor], out)
+  def props(out: ActorRef) = ProxyActor.props(Props(classOf[WebBrowserActor], out))
 }
 
 class WebBrowserActor(out: ActorRef) extends Actor {

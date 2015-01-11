@@ -5,6 +5,7 @@ import akka.actor.{ActorRef, Props}
 import akka.pattern._
 import akka.util.Timeout
 import com.amazing.store.models.User
+import com.amazing.store.monitoring.ProxyActor
 import config.Env
 import models.UserStore
 import com.amazing.store.persistence.processor.{EventsourceProcessor, Recover, RecoverStarting}
@@ -26,7 +27,7 @@ object Messages {
 }
 
 object UserView{
-  val props = Props(classOf[UserView])
+  val props = ProxyActor.props(Props(classOf[UserView]))
 }
 
 class UserView extends View {
@@ -89,7 +90,7 @@ object UserService {
 }
 
 object UsersProcessor {
-  def props(view: ActorRef) = Props(classOf[UsersProcessor], view)
+  def props(view: ActorRef) = ProxyActor.props(Props(classOf[UsersProcessor], view))
 }
 
 class UsersProcessor(view: ActorRef) extends EventsourceProcessor {
