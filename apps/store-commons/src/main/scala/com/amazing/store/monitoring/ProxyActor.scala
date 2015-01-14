@@ -1,7 +1,8 @@
 package com.amazing.store.monitoring
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import com.amazing.store.monitoring.MetricsActor.Mark
+import com.amazing.store.monitoring.Metrics._
+import com.amazing.store.monitoring.MetricsName._
 import play.api.Logger
 
 
@@ -22,9 +23,7 @@ class ProxyActor(props: Props) extends Actor with ActorLogging {
       val message: String = s"New message $msg"
       logger.trace(message)
       log.debug(message)
-      val mark: Mark = Mark(s"akka.message.mark.${msg.getClass.getName}")
-      logger.trace(s"publishing $mark")
-      context.system.eventStream.publish(mark)
+      publishMark(akkaInnerMessageName(msg.getClass.getName))
       actorRef forward msg
   }
 

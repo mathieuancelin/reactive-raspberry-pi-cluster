@@ -7,10 +7,13 @@ import java.util.concurrent.atomic.AtomicLong
 
 import akka.actor._
 import akka.cluster.ClusterEvent._
-import com.google.common.io.Files
+import com.amazing.store.monitoring.Metrics.publishMark
+import com.amazing.store.monitoring.MetricsImplicit._
+import com.amazing.store.monitoring.MetricsName._
+
 
 //import akka.cluster.{Cluster, Member}
-import akka.cluster.{MemberStatus, Member, Cluster}
+import akka.cluster.{Member, Cluster}
 import akka.util.Timeout
 import com.amazing.store.tools.Reference
 import play.api.Logger
@@ -161,20 +164,23 @@ class Client(name: String, system: ActorSystem, timeout: Timeout, cluster: Optio
 
   def ask[T](message: Any)(implicit timeout: Timeout = timeout, tag: ClassTag[T]): Future[Option[T]] = {
     implicit val ec = system.dispatcher
+
     cluster.map {  c =>
       retry(retryTimes) {
         next(Client.members().filter(roleMatches)).map { member =>
           Logger("AKKA-LB-CLIENTS").debug(s"Calling service '/user/$name' with '$message' on '${member.address}'")
             val selection = system.actorSelection(RootActorPath(member.address) / "user" / name)
+            publishMark(akkaOuterMessageName(message.getClass.getName))
             akka.pattern.ask(selection, message)(timeout).mapTo[T](tag).map(Option(_))
         } getOrElse Future.successful(None)
       }
     } getOrElse {
       retry(retryTimes) {
         val selection = system.actorSelection("/user/" + name)
+        publishMark(akkaOuterMessageName(message.getClass.getName))
         akka.pattern.ask(selection, message)(timeout).mapTo[T](tag).map(Option(_))
       }
-    }
+    }.withTimer(s"${message.getClass.getName}")
   }
 
   def !!(message: Any, sender: ActorRef = system.deadLetters): Future[Unit] = broadcast(message, sender)
@@ -184,6 +190,7 @@ class Client(name: String, system: ActorSystem, timeout: Timeout, cluster: Optio
     else cluster.map { c =>
       Client.members().filter(roleMatches).filter(meNotIncluded).foreach { member =>
         Logger("AKKA-LB-CLIENTS").debug(s"Calling service '/user/$name' with '$message' on '${member.address}'")
+        publishMark(akkaOuterMessageName(message.getClass.getName))
         system.actorSelection(RootActorPath(member.address) / name).tell(message, sender)
       }
     }
@@ -197,6 +204,7 @@ class Client(name: String, system: ActorSystem, timeout: Timeout, cluster: Optio
     else cluster.map { c =>
       Client.members().filter(roleMatches).filter(meIncluded).foreach { member =>
         Logger("AKKA-LB-CLIENTS").debug(s"Calling service '/user/$name' with '$message' on '${member.address}'")
+        publishMark(akkaOuterMessageName(message.getClass.getName))
         system.actorSelection(RootActorPath(member.address) / name).tell(message, sender)
       }
     }

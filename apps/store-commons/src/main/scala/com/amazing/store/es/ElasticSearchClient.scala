@@ -1,6 +1,9 @@
 package com.amazing.store.es
 
 import com.amazing.store.es.Errors.{IndexCreationException, IndexingDataException}
+import com.amazing.store.monitoring.Metrics._
+import com.amazing.store.monitoring.MetricsName._
+import com.amazing.store.monitoring.MetricsImplicit._
 import play.api.{Play, Logger}
 import play.api.libs.json._
 import play.api.libs.ws.{WSRequestHolder, WSResponse}
@@ -140,7 +143,8 @@ class Index(indexUrl: String)(implicit ec: ExecutionContext) {
       case None => s"$indexUrl"
       case Some(id) => s"$indexUrl/$id"
     }
-    HttpClient().url(path).post(data).map{
+    publishMark(ELACTICSEARCH_MARK)
+    HttpClient().url(path).post(data).withTimer(ELACTICSEARCH_TIMER).map{
       case r if r.status < 300 =>  Json.parse(r.body)
       case r => throw new IndexingDataException(r.body)
     }
@@ -151,7 +155,8 @@ class Index(indexUrl: String)(implicit ec: ExecutionContext) {
   }
 
   def getAsJsValue(id: String) = {
-    HttpClient().url(s"$indexUrl/$id").get().map(r => Json.parse(r.body) \ "_source")
+    publishMark(ELACTICSEARCH_MARK)
+    HttpClient().url(s"$indexUrl/$id").get().map(r => Json.parse(r.body) \ "_source").withTimer(ELACTICSEARCH_TIMER)
   }
 
   def get(id: String): Future[Option[JsValue]] = {
@@ -159,11 +164,13 @@ class Index(indexUrl: String)(implicit ec: ExecutionContext) {
   }
 
   def search(query: JsValue): Future[Option[SearchResult]] = {
-    HttpClient().url(s"$indexUrl/_search").withBody(query).get().map(handleResponse)
+    publishMark(ELACTICSEARCH_MARK)
+    HttpClient().url(s"$indexUrl/_search").withBody(query).get().map(handleResponse).withTimer(ELACTICSEARCH_TIMER)
   }
 
   def search(query: String): Future[Option[SearchResult]] = {
-    HttpClient().url(s"$indexUrl/_search").withQueryString("q" -> query).get().map(handleResponse)
+    publishMark(ELACTICSEARCH_MARK)
+    HttpClient().url(s"$indexUrl/_search").withQueryString("q" -> query).get().map(handleResponse).withTimer(ELACTICSEARCH_TIMER)
 
   }
 

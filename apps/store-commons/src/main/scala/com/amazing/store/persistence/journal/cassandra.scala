@@ -7,6 +7,9 @@ import java.nio.ByteBuffer
 import akka.actor.ActorContext
 import akka.serialization.SerializationExtension
 import com.amazing.store.cassandra.CassandraDB
+import com.amazing.store.monitoring.Metrics._
+import com.amazing.store.monitoring.MetricsImplicit._
+import com.amazing.store.monitoring.MetricsName._
 import com.datastax.driver.core.utils.Bytes
 import org.joda.time.DateTime
 import play.api.Logger
@@ -65,7 +68,10 @@ class CassandraJournal(context: ActorContext) extends Journal(context) with Stat
 
   override def writeMessages(messages: Seq[JournalMessage]): Unit = {
     messages.foreach{msg =>
-      cassandra.cql(writeMessage).on(msg.persistentId, currentPartitionNr(msg.persistentId).partitionNum: JLong, msg.sequenceNum: JLong, ByteBuffer.wrap(serialization.serialize(msg).get)).perform
+      publish(buildMark(CASSANDRA_JOURNAL_MARK))
+      cassandra.cql(writeMessage).on(msg.persistentId, currentPartitionNr(msg.persistentId).partitionNum: JLong, msg.sequenceNum: JLong, ByteBuffer.wrap(serialization.serialize(msg).get))
+        .perform
+        .withTimer(CASSANDRA_JOURNAL_TIMER)
     }
   }
 

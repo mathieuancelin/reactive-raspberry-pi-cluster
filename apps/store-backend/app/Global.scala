@@ -5,7 +5,7 @@ import akka.actor.{ActorRef, Props, ActorSystem}
 import akka.cluster.Cluster
 import com.amazing.store.cassandra.CassandraDB
 import com.amazing.store.cluster.{SeedConfig, SeedHelper}
-import com.amazing.store.monitoring.{MetricsActor, ProxyActor}
+import com.amazing.store.monitoring.{Metrics, MetricsActor, ProxyActor}
 import com.amazing.store.persistence.processor.DistributedProcessor
 import com.amazing.store.services.{FileService, Directory, Client}
 import com.amazing.store.tools.Reference
@@ -71,7 +71,7 @@ object Global extends GlobalSettings {
     val processorRef = DistributedProcessor(Actors.system()).buildRef("product", ProductProcessor.props())
     Actors.productProcessor.set(processorRef)
     Actors.system().actorOf(ProxyActor.props(Props(classOf[BackendService])), Directory.BACKEND_SERVICE_NAME)
-    Actors.system().actorOf(MetricsActor.props())
+    Metrics.init("store-backend")(Actors.system())
     Env.fileService.set(FileService(Env.cassandra()))
   }
 

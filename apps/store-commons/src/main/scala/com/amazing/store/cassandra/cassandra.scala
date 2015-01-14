@@ -1,8 +1,10 @@
 package com.amazing.store.cassandra
 
-import java.util.Date
 import java.util.concurrent.{Callable, TimeUnit}
 
+import com.amazing.store.monitoring.Metrics._
+import com.amazing.store.monitoring.MetricsImplicit._
+import com.amazing.store.monitoring.MetricsName._
 import com.datastax.driver.core._
 import com.google.common.cache.{Cache, CacheBuilder, RemovalListener, RemovalNotification}
 import com.google.common.util.concurrent.{FutureCallback, Futures, ListenableFuture}
@@ -25,14 +27,16 @@ class CassandraCQLQuery(db: CassandraDB, name: String, query: String, args: Seq[
     first(ec).map(_.flatMap(o => r.reads(o).asOpt))
   }
 
+
   def first(implicit ec: ExecutionContext): Future[Option[JsObject]] = {
+    publishMark(CASSANDRA_DRIVER_MARK)
     db.api.withSession(name) { session =>
       val stmt = createStatement(session)
       Logger("CassandraDB").trace(s"first => ${query}")
       session.executeAsync(stmt).toScalaFuture.map { resultSet =>
         Option(resultSet.one()).map { row => parseRow(row, resultSet) }
       }
-    }
+    }.withTimer(CASSANDRA_DRIVER_TIMER)
   }
 
   def allOf[T](implicit r: Reads[T], ec: ExecutionContext): Future[List[T]] = {
@@ -40,6 +44,7 @@ class CassandraCQLQuery(db: CassandraDB, name: String, query: String, args: Seq[
   }
 
   def all(implicit ec: ExecutionContext): Future[List[JsObject]] = {
+    publishMark(CASSANDRA_DRIVER_MARK)
     db.api.withSession(name) { session =>
       val stmt = createStatement(session)
       Logger("CassandraDB").trace(s"all => ${query}")
@@ -49,23 +54,25 @@ class CassandraCQLQuery(db: CassandraDB, name: String, query: String, args: Seq[
           case list => list.map(row => parseRow(row, resultSet) )
         }
       }
-    }
+    }.withTimer(CASSANDRA_DRIVER_TIMER)
   }
 
   def raw(implicit ec: ExecutionContext):Future[ResultSet] = {
+    publishMark(CASSANDRA_DRIVER_MARK)
     db.api.withSession(name) { session =>
       val stmt = createStatement(session)
       Logger("CassandraDB").trace(s"raw => ${query}")
       session.executeAsync(stmt).toScalaFuture
-    }
+    }.withTimer(CASSANDRA_DRIVER_TIMER)
   }
 
   def perform(implicit ec: ExecutionContext): Future[ExecutionInfo] = {
+    publishMark(CASSANDRA_DRIVER_MARK)
     db.api.withSession(name) { session =>
       val stmt = createStatement(session)
       Logger("CassandraDB").trace(s"perform => ${query}")
-      session.executeAsync(stmt).toScalaFuture.map { r => r.getExecutionInfo }
-    }
+      session.executeAsync(stmt).toScalaFuture.map(r => r.getExecutionInfo)
+    }.withTimer(CASSANDRA_DRIVER_TIMER)
   }
 
   private[cassandra] def createStatement(session: Session) = {

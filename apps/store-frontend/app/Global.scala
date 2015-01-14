@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, Props, ActorSystem}
 import akka.cluster.Cluster
 import com.amazing.store.cassandra.CassandraDB
 import com.amazing.store.cluster.{SeedConfig, SeedHelper}
-import com.amazing.store.monitoring.{MetricsActor, ProxyActor}
+import com.amazing.store.monitoring.{Metrics, MetricsActor, ProxyActor}
 import com.amazing.store.services.{FileService, Directory, Client}
 import com.amazing.store.tools.Reference
 import config.Env
@@ -69,7 +69,7 @@ object Global extends GlobalSettings {
     Client.cluster.set(Actors.cluster())  // Init du locator
     Client.init() // Ecoute du cluster
     Actors.system().actorOf(ProxyActor.props(Props[FrontendService]), Directory.FRONTEND_SERVICE_NAME) // publication du service frontend
-    Actors.system().actorOf(MetricsActor.props())
+    Metrics.init("store-frontend")(Actors.system())
 
     val (out, channel) = Concurrent.broadcast[JsValue]
     Feed.out.set(out)
