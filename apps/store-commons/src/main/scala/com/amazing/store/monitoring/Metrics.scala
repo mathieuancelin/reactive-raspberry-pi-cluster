@@ -26,9 +26,9 @@ object MetricsName {
   val CASSANDRA_JOURNAL_MARK = "cassandra.journal.mark"
   val CASSANDRA_JOURNAL_TIMER = "cassandra.journal.timer"
 
-  def akkaInnerMessageName(theClassName: String) = Metrics.metricName(s"akka.message.inner.${theClassName}")
+  def akkaInnerMessageName(theClassName: String) = s"akka.message.inner.${theClassName}"
 
-  def akkaOuterMessageName(theClassName: String) = Metrics.metricName(s"akka.message.outer.${theClassName}")
+  def akkaOuterMessageName(theClassName: String) = s"akka.message.outer.${theClassName}"
 
 }
 
@@ -39,7 +39,7 @@ object MetricsImplicit {
 class Metrics[T](future: Future[T]) {
 
   def withTimer(name: String)(implicit ec: ExecutionContext): Future[T] = {
-    Metrics.timer(Metrics.metricName(name), future)
+    Metrics.timer(name, future)
   }
 }
 
