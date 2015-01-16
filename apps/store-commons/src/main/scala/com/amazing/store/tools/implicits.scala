@@ -13,10 +13,6 @@ package object flatfutures {
 
   object EmptyOption extends RuntimeException("Current option is empty :'(") with NoStackTrace
 
-  implicit final class sequenceOfFuture[A, M[_] <: TraversableOnce[_]](in: M[Future[A]]) {
-    def asFuture(implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext) = Future.sequence(in)(cbf, ec)
-  }
-
   implicit final class futureOfOptionToFuture[A](future: Future[Option[A]]) {
     def flatten(implicit ec: ExecutionContext): Future[A] = {
       future.flatMap {

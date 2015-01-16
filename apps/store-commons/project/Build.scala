@@ -19,11 +19,12 @@ object StoreCommonsBuild extends Build {
       "org.jgroups" % "jgroups" % "3.4.4.Final",
       "com.datastax.cassandra" % "cassandra-driver-core" % "2.0.3",
       "com.google.code.findbugs" % "jsr305" % "2.0.1",
+      "com.distributedstuff" %% "distributed-services" % "1.0-SNAPSHOT",
       "org.elasticsearch" % "metrics-elasticsearch-reporter" % "2.0"
-
     ),
     organization := "com.amazing.store",
     version := appVersion,
+    scalaVersion := appScalaVersion,
     incOptions := incOptions.value.withNameHashing(true)
   )
 }
