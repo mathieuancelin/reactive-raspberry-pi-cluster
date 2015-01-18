@@ -59,17 +59,17 @@ package object metrics {
 object Global extends GlobalSettings {
 
   override def onStart(app: Application): Unit = {
+    Metrics.init("store-backend")(Akka.system)
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     Product.init()
-    Actors.productView.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[ProductView]))))
-    val processorRef = DistributedProcessor(Akka.system).buildRef("product", ProductProcessor.props())
-    Actors.productProcessor.set(processorRef)
-    Akka.system.actorOf(ProxyActor.props(Props(classOf[BackendService])), Directory.BACKEND_SERVICE_NAME)
-    Metrics.init("store-backend")(Akka.system)
-
     ServiceRegistry.init("BACKEND", Metrics.registry(), Seq(
       Service(name = Directory.BACKEND_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.BACKEND_SERVICE_NAME}")
     ))
+
+    Actors.productView.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[ProductView]))))
+    val processorRef = DistributedProcessor(ServiceRegistry.registry().actors()).buildRef("product", ProductProcessor.props())
+    Actors.productProcessor.set(processorRef)
+    Akka.system.actorOf(ProxyActor.props(Props(classOf[BackendService])), Directory.BACKEND_SERVICE_NAME)
 
     Env.fileService.set(FileService(Env.cassandra()))
   }

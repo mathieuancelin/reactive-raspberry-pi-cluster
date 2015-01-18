@@ -1,23 +1,18 @@
 
 import actors.Actors
 import akka.actor._
-import akka.cluster.Cluster
 import com.amazing.store.cassandra.CassandraDB
-import com.amazing.store.cluster.{SeedConfig, SeedHelper}
-import com.amazing.store.monitoring.{Metrics, MetricsActor, ProxyActor}
+import com.amazing.store.monitoring.{Metrics, ProxyActor}
 import com.amazing.store.persistence.processor.DistributedProcessor
-import com.amazing.store.services.{ServiceRegistry, Client, Directory}
+import com.amazing.store.services.{Directory, ServiceRegistry}
 import com.amazing.store.tools.Reference
 import com.distributedstuff.services.api.Service
 import config.Env
-import models.{UserStore, UserService}
+import models.{UserService, UserStore}
+import play.api.Play.current
 import play.api._
 import play.api.libs.concurrent.Akka
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.{UsersProcessor, UserView}
-
-import scala.util.Failure
-import play.api.Play.current
+import services.{UserView, UsersProcessor}
 
 package object config {
   object Env {
@@ -66,12 +61,13 @@ object Global extends GlobalSettings {
     UserStore.init()
     val userView: ActorRef = Akka.system.actorOf(UserView.props)
     Actors.userView.set(userView)
-    val buildRef = DistributedProcessor(Akka.system).buildRef("userprocessor", UsersProcessor.props(userView))
-    Actors.userProcessor.set(buildRef)
 
     ServiceRegistry.init("IDENTITY", Metrics.registry(), Seq(
       Service(name = Directory.USER_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.USER_SERVICE_NAME}")
     ))
+
+    val buildRef = DistributedProcessor(ServiceRegistry.registry().actors()).buildRef("userprocessor", UsersProcessor.props(userView))
+    Actors.userProcessor.set(buildRef)
 
   }
 

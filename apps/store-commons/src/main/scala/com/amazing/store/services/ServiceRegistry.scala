@@ -4,9 +4,6 @@ import com.amazing.store.tools.Reference
 import com.codahale.metrics.MetricRegistry
 import com.distributedstuff.services.api.{ServicesApi, Service, Services}
 
-/**
- * Created by adelegue on 16/01/15.
- */
 object ServiceRegistry {
 
   val registry = Reference.empty[ServicesApi]
@@ -15,6 +12,4 @@ object ServiceRegistry {
     registry.set(Services(name= name, metrics = metrics).startFromConfig())
     services.map(registry().registerService)
   }
-
-
 }

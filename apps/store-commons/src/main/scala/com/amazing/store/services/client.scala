@@ -22,6 +22,7 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
+/**
 class ClusterStateClient extends Actor {
 
   val cluster = Cluster(context.system)
@@ -229,3 +230,4 @@ class Client(name: String, system: ActorSystem, timeout: Timeout, cluster: Optio
   //  case (role, nb) => Green(role, nb)
   //}
 }
+  **/

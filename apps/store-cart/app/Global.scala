@@ -77,14 +77,14 @@ object Global extends GlobalSettings {
     Cart.init()
     OrderStore.init()
 
-    Actors.cartView.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[CartView]))))
-    val processorRef = DistributedProcessor(Akka.system).buildRef("cart", CartProcessor.props())
-    Actors.cartProcessor.set(processorRef)
-    Actors.cartService.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[RemoteCartService])), Directory.CART_SERVICE_NAME))
 
     ServiceRegistry.init("CART", Metrics.registry(), Seq(
       Service(name = Directory.CART_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.CART_SERVICE_NAME}")
     ))
+    Actors.cartView.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[CartView]))))
+    val processorRef = DistributedProcessor(ServiceRegistry.registry().actors()).buildRef("cart", CartProcessor.props())
+    Actors.cartProcessor.set(processorRef)
+    Actors.cartService.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[RemoteCartService])), Directory.CART_SERVICE_NAME))
 
   }
 

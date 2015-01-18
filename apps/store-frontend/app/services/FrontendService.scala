@@ -2,11 +2,12 @@ package services
 
 import akka.actor.Actor
 import akka.pattern.pipe
-import com.amazing.store.messages.{ChangeProductPrice, UpdateProduct, CreateProduct}
-import com.amazing.store.services.{Directory, Client}
-import play.api.libs.json.Json
+import com.amazing.store.messages.{ChangeProductPrice, CreateProduct, UpdateProduct}
+import com.amazing.store.services.{ServiceRegistry, Directory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json.Json
 
+import com.distributedstuff.services.clients.akkasupport.AkkaClientSupport
 /**
  *
  *
@@ -32,7 +33,8 @@ class FrontendService extends Actor {
       metrics.Messages.ping.close()
     case BroadCastUpdate(p) =>
       config.Env.logger.debug(s"Broadcasting event : $p")
-      Client().withRole(Directory.ROLE_FRONTEND).ref(Directory.FRONTEND_SERVICE_NAME) !!! FragmentsProductUpdated(p)
+      ServiceRegistry.registry().akkaClient(Directory.FRONTEND_SERVICE_NAME) !! FragmentsProductUpdated(p)
+      //Client().withRole(Directory.ROLE_FRONTEND).ref(Directory.FRONTEND_SERVICE_NAME) !!! FragmentsProductUpdated(p)
       self ! FragmentsProductUpdated(p)
       metrics.Messages.ping.close()
     case FragmentsProductUpdated(p) =>
