@@ -52,23 +52,21 @@ package object metrics {
 object Global extends GlobalSettings {
 
   override def onStart(app: Application): Unit = {
-    Akka.system.actorOf(ProxyActor.props(Props[UserService]), Directory.USER_SERVICE_NAME)  // Init du service Users
 
-    Metrics.init("store-identity")(Akka.system)
+    ServiceRegistry.init("IDENTITY", Seq(
+      Service(name = Directory.USER_SERVICE_NAME, url = s"akka.tcp://distributed-services@${Env.hostname}:${Env.port}/user/${Directory.USER_SERVICE_NAME}")
+    ))
+    val system = ServiceRegistry.registry().actors()
+    Metrics.init("store-identity")(system)
+    ServiceRegistry.registry().useMetrics(Metrics.registry())
 
-
+    system.actorOf(ProxyActor.props(Props[UserService]), Directory.USER_SERVICE_NAME)  // Init du service Users
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     UserStore.init()
-    val userView: ActorRef = Akka.system.actorOf(UserView.props)
+    val userView: ActorRef = system.actorOf(UserView.props)
     Actors.userView.set(userView)
-
-    ServiceRegistry.init("IDENTITY", Metrics.registry(), Seq(
-      Service(name = Directory.USER_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.USER_SERVICE_NAME}")
-    ))
-
-    val buildRef = DistributedProcessor(ServiceRegistry.registry().actors()).buildRef("userprocessor", UsersProcessor.props(userView))
+    val buildRef = DistributedProcessor(system).buildRef("userprocessor", UsersProcessor.props(userView))
     Actors.userProcessor.set(buildRef)
-
   }
 
   override def onStop(app: Application): Unit = {

@@ -7,9 +7,7 @@ import com.amazing.store.services.{Directory, FileService, ServiceRegistry}
 import com.amazing.store.tools.Reference
 import com.distributedstuff.services.api.Service
 import config.Env
-import play.api.Play.current
 import play.api._
-import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.iteratee.Concurrent.Channel
 import play.api.libs.iteratee.{Concurrent, Enumerator}
@@ -61,18 +59,20 @@ import com.codahale.metrics.MetricRegistry
 object Global extends GlobalSettings {
 
   override def onStart(app: Application): Unit = {
-    Akka.system.actorOf(ProxyActor.props(Props[FrontendService]), Directory.FRONTEND_SERVICE_NAME) // publication du service frontend
-    Metrics.init("store-frontend")(Akka.system)
+    ServiceRegistry.init("FRONTEND", Seq(
+      Service(name = Directory.FRONTEND_SERVICE_NAME, url = s"akka.tcp://distributed-services@${Env.hostname}:${Env.port}/user/${Directory.FRONTEND_SERVICE_NAME}")
+    ))
+    val system = ServiceRegistry.registry().actors()
+    Metrics.init("store-frontend")(system)
+    ServiceRegistry.registry().useMetrics(Metrics.registry())
+
+    system.actorOf(ProxyActor.props(Props[FrontendService]), Directory.FRONTEND_SERVICE_NAME) // publication du service frontend
 
     val (out, channel) = Concurrent.broadcast[JsValue]
     Feed.out.set(out)
     Feed.channel.set(channel)
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     Env.fileService.set(FileService(Env.cassandra()))
-
-    ServiceRegistry.init("FRONTEND", Metrics.registry(), Seq(
-      Service(name = Directory.FRONTEND_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.FRONTEND_SERVICE_NAME}")
-    ))
   }
 
   override def onRequestCompletion(request : play.api.mvc.RequestHeader) : scala.Unit = {

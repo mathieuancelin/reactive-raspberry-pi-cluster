@@ -11,9 +11,7 @@ import com.amazing.store.tools.Reference
 import com.distributedstuff.services.api.Service
 import config.Env
 import models.{Cart, OrderStore}
-import play.api.Play.current
 import play.api._
-import play.api.libs.concurrent.Akka
 import services.{CartProcessor, CartView, RemoteCartService}
 
 package object config {
@@ -70,21 +68,22 @@ object Global extends GlobalSettings {
           Env.logger.debug(s"No file")
       }
     }
-
-    Metrics.init("store-cart")(Akka.system)
+    ServiceRegistry.init("CART", Seq(
+      Service(name = Directory.CART_SERVICE_NAME, url = s"akka.tcp://distributed-services@${Env.hostname}:${Env.port}/user/${Directory.CART_SERVICE_NAME}")
+    ))
+    val system = ServiceRegistry.registry().actors()
+    Metrics.init("store-cart")(system)
+    ServiceRegistry.registry().useMetrics(Metrics.registry())
 
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     Cart.init()
+
     OrderStore.init()
 
-
-    ServiceRegistry.init("CART", Metrics.registry(), Seq(
-      Service(name = Directory.CART_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.CART_SERVICE_NAME}")
-    ))
-    Actors.cartView.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[CartView]))))
-    val processorRef = DistributedProcessor(ServiceRegistry.registry().actors()).buildRef("cart", CartProcessor.props())
+    Actors.cartView.set(system.actorOf(ProxyActor.props(Props(classOf[CartView]))))
+    val processorRef = DistributedProcessor(system).buildRef("cart", CartProcessor.props())
     Actors.cartProcessor.set(processorRef)
-    Actors.cartService.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[RemoteCartService])), Directory.CART_SERVICE_NAME))
+    Actors.cartService.set(system.actorOf(ProxyActor.props(Props(classOf[RemoteCartService])), Directory.CART_SERVICE_NAME))
 
   }
 

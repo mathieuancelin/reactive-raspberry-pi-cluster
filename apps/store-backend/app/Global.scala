@@ -11,10 +11,8 @@ import com.distributedstuff.services.api.Service
 import config.Env
 import models.Product
 import play.api._
-import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import services._
-import play.api.Play.current
 
 package object config {
   object Env {
@@ -59,17 +57,20 @@ package object metrics {
 object Global extends GlobalSettings {
 
   override def onStart(app: Application): Unit = {
-    Metrics.init("store-backend")(Akka.system)
+    ServiceRegistry.init("BACKEND", Seq(
+      Service(name = Directory.BACKEND_SERVICE_NAME, url = s"akka.tcp://distributed-services@${Env.hostname}:${Env.port}/user/${Directory.BACKEND_SERVICE_NAME}")
+    ))
+    val system = ServiceRegistry.registry().actors()
+    Metrics.init("store-backend")(system)
+    ServiceRegistry.registry().useMetrics(Metrics.registry())
+
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     Product.init()
-    ServiceRegistry.init("BACKEND", Metrics.registry(), Seq(
-      Service(name = Directory.BACKEND_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.BACKEND_SERVICE_NAME}")
-    ))
 
-    Actors.productView.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[ProductView]))))
-    val processorRef = DistributedProcessor(ServiceRegistry.registry().actors()).buildRef("product", ProductProcessor.props())
+    Actors.productView.set(system.actorOf(ProxyActor.props(Props(classOf[ProductView]))))
+    val processorRef = DistributedProcessor(system).buildRef("product", ProductProcessor.props())
     Actors.productProcessor.set(processorRef)
-    Akka.system.actorOf(ProxyActor.props(Props(classOf[BackendService])), Directory.BACKEND_SERVICE_NAME)
+    system.actorOf(ProxyActor.props(Props(classOf[BackendService])), Directory.BACKEND_SERVICE_NAME)
 
     Env.fileService.set(FileService(Env.cassandra()))
   }
