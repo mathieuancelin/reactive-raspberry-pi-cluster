@@ -20,6 +20,7 @@ object StoreBackendBuild extends Build {
     ),
     organization := "com.amazing.store",
     version := appVersion,
+    scalaVersion := appScalaVersion,
     incOptions := incOptions.value.withNameHashing(true),
     resolvers ++= Seq(
       "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",

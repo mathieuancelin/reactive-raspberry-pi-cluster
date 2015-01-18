@@ -6,15 +6,18 @@ import com.amazing.store.cassandra.CassandraDB
 import com.amazing.store.cluster.{SeedConfig, SeedHelper}
 import com.amazing.store.monitoring.{Metrics, MetricsActor, ProxyActor}
 import com.amazing.store.persistence.processor.DistributedProcessor
-import com.amazing.store.services.{Client, Directory}
+import com.amazing.store.services.{ServiceRegistry, Client, Directory}
 import com.amazing.store.tools.Reference
+import com.distributedstuff.services.api.Service
 import config.Env
 import models.{UserStore, UserService}
 import play.api._
+import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import services.{UsersProcessor, UserView}
 
 import scala.util.Failure
+import play.api.Play.current
 
 package object config {
   object Env {
@@ -26,14 +29,14 @@ package object config {
     val backendLink = Play.current.configuration.getString("amazing-config.links.backend").getOrElse("http://backend.amazing.com")
     val identityLink = Play.current.configuration.getString("amazing-config.links.identity").getOrElse("http://identity.amazing.com")
     val cassandra = Reference.empty[CassandraDB]()
+    val hostname = Play.current.configuration.getString("services.boot.host").getOrElse("127.0.0.1")
+    val port = Play.current.configuration.getInt("services.boot.port").getOrElse(2550)
   }
 }
 
 package object actors {
 
   object Actors {
-    val system = Reference.empty[ActorSystem]()
-    val cluster = Reference.empty[Cluster]()
     val userView = Reference.empty[ActorRef]()
     val userProcessor = Reference.empty[ActorRef]()
   }
@@ -54,27 +57,26 @@ package object metrics {
 object Global extends GlobalSettings {
 
   override def onStart(app: Application): Unit = {
-    Actors.system.set(ActorSystem(Env.systemName, Play.current.configuration.underlying.getConfig(Env.configName)))
-    Actors.cluster.set(Cluster(Actors.system()))
-    Client.system.set(Actors.system())  // Init du locator
-    Client.cluster.set(Actors.cluster())  // Init du locator
-    Client.init() // Ecoute du cluster
-    Actors.system().actorOf(ProxyActor.props(Props[UserService]), Directory.USER_SERVICE_NAME)  // Init du service Users
+    Akka.system.actorOf(ProxyActor.props(Props[UserService]), Directory.USER_SERVICE_NAME)  // Init du service Users
 
-    Metrics.init("store-identity")(Actors.system())
+    Metrics.init("store-identity")(Akka.system)
 
 
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     UserStore.init()
-    val userView: ActorRef = Actors.system().actorOf(UserView.props)
+    val userView: ActorRef = Akka.system.actorOf(UserView.props)
     Actors.userView.set(userView)
-    val buildRef = DistributedProcessor(Actors.system()).buildRef("userprocessor", UsersProcessor.props(userView))
+    val buildRef = DistributedProcessor(Akka.system).buildRef("userprocessor", UsersProcessor.props(userView))
     Actors.userProcessor.set(buildRef)
+
+    ServiceRegistry.init("IDENTITY", Metrics.registry(), Seq(
+      Service(name = Directory.USER_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.USER_SERVICE_NAME}")
+    ))
+
   }
 
   override def onStop(app: Application): Unit = {
     Env.cassandra().stop()
-    Actors.system.foreach(_.shutdown())
   }
 }
 

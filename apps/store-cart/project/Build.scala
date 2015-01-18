@@ -19,6 +19,7 @@ object StoreCartBuild extends Build {
       "com.github.krasserm" %% "akka-persistence-cassandra" % "0.3.2"
     ),
     organization := "org.amazing.store",
+    scalaVersion := appScalaVersion,
     incOptions := incOptions.value.withNameHashing(true),
     resolvers ++= Seq(
       "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",

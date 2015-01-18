@@ -64,6 +64,7 @@ object Client {
 
   private[this] val timeout: Timeout = Timeout(5, TimeUnit.SECONDS)
 
+  def members(): Seq[Member] = cluster().state.members.toSeq.filterNot(unreachable.contains)
   val unreachable = Collections.synchronizedSet(new util.HashSet[Member]())
 
   //def members(): Seq[Member] = {
@@ -83,7 +84,6 @@ object Client {
   // )
   //}
 
-  def members(): Seq[Member] = cluster().state.members.toSeq.filterNot(unreachable.contains)
 
   private[services] def displayState() = {
     Logger("CLIENTS_WATCHER").debug(s"----------------------------------------------------------------------------")

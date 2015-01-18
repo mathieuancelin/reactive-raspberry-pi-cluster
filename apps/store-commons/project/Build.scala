@@ -25,6 +25,7 @@ object StoreCommonsBuild extends Build {
     organization := "com.amazing.store",
     version := appVersion,
     scalaVersion := appScalaVersion,
+    scalaVersion := appScalaVersion,
     incOptions := incOptions.value.withNameHashing(true)
   )
 }

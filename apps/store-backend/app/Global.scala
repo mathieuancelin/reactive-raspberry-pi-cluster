@@ -1,21 +1,20 @@
 import java.util.concurrent.atomic.AtomicBoolean
 
 import actors.Actors
-import akka.actor.{ActorRef, Props, ActorSystem}
-import akka.cluster.Cluster
+import akka.actor.{ActorRef, Props}
 import com.amazing.store.cassandra.CassandraDB
-import com.amazing.store.cluster.{SeedConfig, SeedHelper}
-import com.amazing.store.monitoring.{Metrics, MetricsActor, ProxyActor}
+import com.amazing.store.monitoring.{Metrics, ProxyActor}
 import com.amazing.store.persistence.processor.DistributedProcessor
-import com.amazing.store.services.{FileService, Directory, Client}
+import com.amazing.store.services.{Directory, FileService, ServiceRegistry}
 import com.amazing.store.tools.Reference
+import com.distributedstuff.services.api.Service
 import config.Env
 import models.Product
 import play.api._
+import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import services._
-
-import scala.util.Failure
+import play.api.Play.current
 
 package object config {
   object Env {
@@ -30,15 +29,15 @@ package object config {
 
     val cassandra = Reference.empty[CassandraDB]()
     val fileService = Reference.empty[FileService]()
+
+    val hostname = Play.current.configuration.getString("services.boot.host").getOrElse("127.0.0.1")
+    val port = Play.current.configuration.getInt("services.boot.port").getOrElse(2550)
   }
 }
 
 package object actors {
 
   object Actors {
-    val system = Reference.empty[ActorSystem]()
-    val cluster = Reference.empty[Cluster]()
-
     val productProcessor = Reference.empty[ActorRef]()
     val productView = Reference.empty[ActorRef]()
     val websocket = Reference.empty[ActorRef]()
@@ -62,21 +61,20 @@ object Global extends GlobalSettings {
   override def onStart(app: Application): Unit = {
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     Product.init()
-    Actors.system.set(ActorSystem(Env.systemName, Play.current.configuration.underlying.getConfig(Env.configName)))
-    Actors.cluster.set(Cluster(Actors.system()))
-    Client.system.set(Actors.system())  // Init du locator
-    Client.cluster.set(Actors.cluster())  // Init du locator
-    Client.init()
-    Actors.productView.set(Actors.system().actorOf(ProxyActor.props(Props(classOf[ProductView]))))
-    val processorRef = DistributedProcessor(Actors.system()).buildRef("product", ProductProcessor.props())
+    Actors.productView.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[ProductView]))))
+    val processorRef = DistributedProcessor(Akka.system).buildRef("product", ProductProcessor.props())
     Actors.productProcessor.set(processorRef)
-    Actors.system().actorOf(ProxyActor.props(Props(classOf[BackendService])), Directory.BACKEND_SERVICE_NAME)
-    Metrics.init("store-backend")(Actors.system())
+    Akka.system.actorOf(ProxyActor.props(Props(classOf[BackendService])), Directory.BACKEND_SERVICE_NAME)
+    Metrics.init("store-backend")(Akka.system)
+
+    ServiceRegistry.init("BACKEND", Metrics.registry(), Seq(
+      Service(name = Directory.BACKEND_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.BACKEND_SERVICE_NAME}")
+    ))
+
     Env.fileService.set(FileService(Env.cassandra()))
   }
 
   override def onStop(app: Application): Unit = {
     Env.cassandra().stop()
-    Actors.system.foreach(_.shutdown())
   }
 }

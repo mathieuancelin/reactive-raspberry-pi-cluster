@@ -2,21 +2,19 @@
 import java.util.concurrent.atomic.AtomicBoolean
 
 import actors.Actors
-import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.cluster.Cluster
+import akka.actor.{ActorRef, Props}
 import com.amazing.store.cassandra.CassandraDB
-import com.amazing.store.cluster.{SeedConfig, SeedHelper}
-import com.amazing.store.monitoring.{Metrics, MetricsActor, ProxyActor}
+import com.amazing.store.monitoring.{Metrics, ProxyActor}
 import com.amazing.store.persistence.processor.DistributedProcessor
-import com.amazing.store.services.{Client, Directory}
+import com.amazing.store.services.{Directory, ServiceRegistry}
 import com.amazing.store.tools.Reference
+import com.distributedstuff.services.api.Service
 import config.Env
-import models.{OrderStore, Cart}
+import models.{Cart, OrderStore}
+import play.api.Play.current
 import play.api._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.{RemoteCartService, CartProcessor, CartView}
-
-import scala.util.Failure
+import play.api.libs.concurrent.Akka
+import services.{CartProcessor, CartView, RemoteCartService}
 
 package object config {
   object Env {
@@ -29,14 +27,15 @@ package object config {
     val identityLink = Play.current.configuration.getString("amazing-config.links.identity").getOrElse("http://identity.amazing.com")
     val cassandra = Reference.empty[CassandraDB]()
     val canRecover = new AtomicBoolean(true)
+
+    val hostname = Play.current.configuration.getString("services.boot.host").getOrElse("127.0.0.1")
+    val port = Play.current.configuration.getInt("services.boot.port").getOrElse(2550)
   }
 }
 
 package object actors {
 
   object Actors {
-    val system = Reference.empty[ActorSystem]()
-    val cluster = Reference.empty[Cluster]()
     val cartService = Reference.empty[ActorRef]()
     val webBrowser = Reference.empty[ActorRef]()
     val cartView = Reference.empty[ActorRef]()
@@ -72,28 +71,24 @@ object Global extends GlobalSettings {
       }
     }
 
-    Actors.system.set(ActorSystem(Env.systemName, Play.current.configuration.underlying.getConfig(Env.configName)))
-    Metrics.init("store-cart")(Actors.system())
+    Metrics.init("store-cart")(Akka.system)
 
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     Cart.init()
     OrderStore.init()
 
-    Client.system.set(Actors.system())  // Init du locator
-    Actors.cluster.set(Cluster(Actors.system()))
-    Client.cluster.set(Actors.cluster())  // Init du locator
-    Client.init()  // Ecoute du cluster
-
-    Actors.cartView.set(Actors.system().actorOf(ProxyActor.props(Props(classOf[CartView]))))
-    val processorRef = DistributedProcessor(Actors.system()).buildRef("cart", CartProcessor.props())
+    Actors.cartView.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[CartView]))))
+    val processorRef = DistributedProcessor(Akka.system).buildRef("cart", CartProcessor.props())
     Actors.cartProcessor.set(processorRef)
-    Actors.cartService.set(Actors.system().actorOf(ProxyActor.props(Props(classOf[RemoteCartService])), Directory.CART_SERVICE_NAME))
+    Actors.cartService.set(Akka.system.actorOf(ProxyActor.props(Props(classOf[RemoteCartService])), Directory.CART_SERVICE_NAME))
 
+    ServiceRegistry.init("CART", Metrics.registry(), Seq(
+      Service(name = Directory.CART_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.CART_SERVICE_NAME}")
+    ))
 
   }
 
   override def onStop(app: Application): Unit = {
     Env.cassandra().stop()
-    Actors.system.foreach(_.shutdown())
   }
 }

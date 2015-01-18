@@ -1,22 +1,20 @@
 
-import actors.Actors
-import akka.actor.{ActorRef, Props, ActorSystem}
-import akka.cluster.Cluster
-import com.amazing.store.cassandra.CassandraDB
-import com.amazing.store.cluster.{SeedConfig, SeedHelper}
-import com.amazing.store.monitoring.{Metrics, MetricsActor, ProxyActor}
-import com.amazing.store.services.{FileService, Directory, Client}
-import com.amazing.store.tools.Reference
-import config.Env
 import _root_.http.Feed
-import play.api.libs.iteratee.Concurrent.Channel
-import play.api.libs.iteratee.{Enumerator, Concurrent}
-import play.api.libs.json.JsValue
+import akka.actor.{ActorRef, Props}
+import com.amazing.store.cassandra.CassandraDB
+import com.amazing.store.monitoring.{Metrics, ProxyActor}
+import com.amazing.store.services.{Directory, FileService, ServiceRegistry}
+import com.amazing.store.tools.Reference
+import com.distributedstuff.services.api.Service
+import config.Env
+import play.api.Play.current
 import play.api._
-import services.FrontendService
+import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import scala.util.Failure
+import play.api.libs.iteratee.Concurrent.Channel
+import play.api.libs.iteratee.{Concurrent, Enumerator}
+import play.api.libs.json.JsValue
+import services.FrontendService
 
 package object config {
   object Env {
@@ -29,14 +27,14 @@ package object config {
     val identityLink = Play.current.configuration.getString("amazing-config.links.identity").getOrElse("http://identity.amazing.com")
     val cassandra = Reference.empty[CassandraDB]()
     val fileService = Reference.empty[FileService]()
+    val hostname = Play.current.configuration.getString("services.boot.host").getOrElse("127.0.0.1")
+    val port = Play.current.configuration.getInt("services.boot.port").getOrElse(2550)
   }
 }
 
 package object actors {
 
   object Actors {
-    val system = Reference.empty[ActorSystem]()
-    val cluster = Reference.empty[Cluster]()
     val webBrowserActor = Reference.empty[ActorRef]()
   }
 }
@@ -63,23 +61,18 @@ import com.codahale.metrics.MetricRegistry
 object Global extends GlobalSettings {
 
   override def onStart(app: Application): Unit = {
-    Actors.system.set(ActorSystem(Env.systemName, Play.current.configuration.underlying.getConfig(Env.configName)))
-    Client.system.set(Actors.system())  // Init du locator
-    Actors.cluster.set(Cluster(Actors.system()))
-    Client.cluster.set(Actors.cluster())  // Init du locator
-    Client.init() // Ecoute du cluster
-    Actors.system().actorOf(ProxyActor.props(Props[FrontendService]), Directory.FRONTEND_SERVICE_NAME) // publication du service frontend
-    Metrics.init("store-frontend")(Actors.system())
+    Akka.system.actorOf(ProxyActor.props(Props[FrontendService]), Directory.FRONTEND_SERVICE_NAME) // publication du service frontend
+    Metrics.init("store-frontend")(Akka.system)
 
     val (out, channel) = Concurrent.broadcast[JsValue]
     Feed.out.set(out)
     Feed.channel.set(channel)
     Env.cassandra <== CassandraDB("default", app.configuration.getConfig("cassandra").getOrElse(Configuration.empty))
     Env.fileService.set(FileService(Env.cassandra()))
-  }
 
-  override def onStop(app: Application): Unit = {
-    Actors.system.foreach(_.shutdown())
+    ServiceRegistry.init("FRONTEND", Metrics.registry(), Seq(
+      Service(name = Directory.FRONTEND_SERVICE_NAME, url = s"akka.tcp://${Akka.system.name}@${Env.hostname}:${Env.port}/user/${Directory.FRONTEND_SERVICE_NAME}")
+    ))
   }
 
   override def onRequestCompletion(request : play.api.mvc.RequestHeader) : scala.Unit = {

@@ -35,6 +35,7 @@ object StoreFrontendBuild extends Build {
         "com.typesafe.akka" %% "akka-persistence-experimental" % "2.3.4"
       ),
       version := appVersion,
+      scalaVersion := appScalaVersion,
       organization := "org.amazing.store",
       incOptions := incOptions.value.withNameHashing(true),
       resolvers ++= Seq(
