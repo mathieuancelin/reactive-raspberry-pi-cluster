@@ -13,6 +13,7 @@ or here :
 * https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi
 * https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi-poitiers
 * https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi-paris-scala-ug
+* https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi-devoxx-france-2015
 
 
 The video of the presentation (in french) is available here :
