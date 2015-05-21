@@ -6,7 +6,7 @@ The slides of the presentation are here :
 * https://github.com/mathieuancelin/reactive-raspberry-pi-cluster/raw/master/ReactiveAppOnRaspberryPi-nantes.pdf
 * https://github.com/mathieuancelin/reactive-raspberry-pi-cluster/raw/master/ReactiveAppOnRaspberryPi-poitiers.pdf
 * https://github.com/mathieuancelin/reactive-raspberry-pi-cluster/raw/master/ReactiveAppOnRaspberryPi-sug.pdf
-
+* https://github.com/mathieuancelin/reactive-raspberry-pi-cluster/raw/master/ReactiveAppOnRaspberryPi-jug-grenoble
 
 or here :
 
@@ -14,6 +14,7 @@ or here :
 * https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi-poitiers
 * https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi-paris-scala-ug
 * https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi-devoxx-france-2015
+* https://speakerdeck.com/mathieuancelin/i-dont-always-write-reactive-applications-but-when-i-do-it-runs-on-raspberry-pi-number-reactiveraspberrytour
 
 
 The video of the presentation (in french) is available here :
